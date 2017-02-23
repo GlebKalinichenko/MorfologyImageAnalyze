@@ -51,6 +51,22 @@ public class BitmapHelper {
         return img;
     }
 
+    public int[][] breaking(int[][] pixels){
+        int[][] resPixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
+        int[][] erosionPixels = erosion(pixels);
+        resPixels = increase(erosionPixels);
+
+        return resPixels;
+    }
+
+    public int[][] closure(int[][] pixels){
+        int[][] resPixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
+        int[][] increasePixels = increase(pixels);
+        resPixels = erosion(increasePixels);
+
+        return resPixels;
+    }
+
     public int[][] erosion(int[][] pixels){
         int[][] resPixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
 
@@ -69,9 +85,6 @@ public class BitmapHelper {
                 }
             }
         }
-
-        Logger.log("Erosion");
-        printPixels(resPixels);
 
         return resPixels;
     }
@@ -146,9 +159,6 @@ public class BitmapHelper {
             }
 
         }
-
-        Logger.log("Increase");
-        printPixels(res);
 
         return res;
     }
@@ -233,7 +243,7 @@ public class BitmapHelper {
         }
     }
 
-    private void printPixels(int[][] pixels){
+    public void printPixels(int[][] pixels){
         for (int i = 0; i < IMAGE_WIDTH; i++){
             for (int j = 0; j < IMAGE_HEIGHT; j++){
                 System.out.print(pixels[j][i]);
