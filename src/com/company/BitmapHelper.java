@@ -24,6 +24,7 @@ public class BitmapHelper {
     private int[][] innerBottomLeftMatrix = new int[2][2];
     private int[][] innerBottomRigthMatrix = new int[2][2];
     private int[][] noiseMatrix = new int[3][3];
+    private int[][] structureElement = new int[3][3];
     List<int[][]> outherMatrix = new ArrayList<>();
     List<int[][]> innerMatrix = new ArrayList<>();
     private int innerAngle = 0;
@@ -48,6 +49,69 @@ public class BitmapHelper {
         }
 
         return img;
+    }
+
+    public void increase(int[][] pixels){
+        int[][] res = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
+        initOutherInnerMatrix();
+
+        for (int i = 0; i < IMAGE_WIDTH; i++){
+            for (int j = 0; j < IMAGE_HEIGHT; j++){
+                if (!((i - 1 == -1) || (j - 1 == -1) || (i + 1 >= IMAGE_WIDTH) || (j + 1 >= IMAGE_HEIGHT))) {
+                    if (pixels[i][j] == 1){
+                        int[][] curPixels = new int[3][3];
+
+                        curPixels[0][0] = pixels[i - 1][j - 1];
+                        curPixels[0][1] = pixels[i - 1][j];
+                        curPixels[0][2] = pixels[i - 1][j + 1];
+
+                        curPixels[1][0] = pixels[i][j - 1];
+                        curPixels[1][1] = pixels[i][j];
+                        curPixels[1][2] = pixels[i][j + 1];
+
+                        curPixels[2][0] = pixels[i + 1][j - 1];
+                        curPixels[2][1] = pixels[i + 1][j];
+                        curPixels[2][2] = pixels[i + 1][j + 1];
+
+                        int[][] refPixels = doIncrease(curPixels);
+
+                        res[i - 1][j - 1] = refPixels[0][0];
+                        res[i - 1][j] = refPixels[0][1];
+                        res[i - 1][j + 1] = refPixels[0][2];
+
+                        res[i][j - 1] = refPixels[1][0];
+                        res[i][j] = refPixels[1][1];
+                        res[i][j + 1] = refPixels[1][2];
+
+                        res[i + 1][j - 1] = refPixels[2][0];
+                        res[i + 1][j] = refPixels[2][1];
+                        res[i + 1][j + 1] = refPixels[2][2];
+                    }
+                }
+
+            }
+
+        }
+
+        printPixels(res);
+    }
+
+    private int[][] doIncrease(int[][] curPixels){
+        int[][] resPixels = new int[3][3];
+
+        for (int i = 0; i < 3; i++){
+            for (int j = 0; j < 3; j++){
+                boolean curPixel = BooleanHelper.toBoolean(curPixels[i][j]);
+                boolean curComparePixel = BooleanHelper.toBoolean(structureElement[i][j]);
+
+                boolean resPixel = Boolean.logicalOr(curPixel, curComparePixel);
+                int res = BooleanHelper.toInt(resPixel);
+
+                resPixels[i][j] = res;
+            }
+        }
+
+        return resPixels;
     }
 
     private int[][] clearNoise(int[][] pixels){
@@ -112,7 +176,7 @@ public class BitmapHelper {
         }
     }
 
-    private void printMarkers(int[][] pixels){
+    private void printPixels(int[][] pixels){
         for (int i = 0; i < IMAGE_WIDTH; i++){
             for (int j = 0; j < IMAGE_HEIGHT; j++){
                 System.out.print(pixels[j][i]);
@@ -125,7 +189,7 @@ public class BitmapHelper {
         int[][] negPixels = negativePixels(pixels);
         findComponent(negPixels, label);
         System.out.println(String.valueOf(negPixels));
-        printMarkers(negPixels);
+        printPixels(negPixels);
         //Log.d(LOG_TAG, String.valueOf(negPixels));
     }
 
@@ -324,6 +388,19 @@ public class BitmapHelper {
         noiseMatrix[2][1] = 1;
         noiseMatrix[2][2] = 1;
 
+        //init structure element
+        structureElement[0][0] = 1;
+        structureElement[0][1] = 1;
+        structureElement[0][2] = 1;
+
+        structureElement[1][0] = 1;
+        structureElement[1][1] = 1;
+        structureElement[1][2] = 1;
+
+        structureElement[2][0] = 1;
+        structureElement[2][1] = 1;
+        structureElement[2][2] = 1;
+
         //initialize array of masks
         outherMatrix = new ArrayList<>();
         outherMatrix.add(outherTopLeftMatrix);
@@ -374,9 +451,9 @@ public class BitmapHelper {
     private int binarizationColor(double semitonColor) {
         int binaryColor;
         if (semitonColor > THRESHOLD)
-            binaryColor = 1;
-        else
             binaryColor = 0;
+        else
+            binaryColor = 1;
 
         return binaryColor;
     }
