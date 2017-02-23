@@ -8,6 +8,7 @@ public class Main {
         BitmapHelper helper = BitmapHelper.getInstance();
         BufferedImage img = helper.getImage("C:\\Users\\Gleb\\IdeaProjects\\DetectFigures\\test.png");
         int[][] binaryPixels = helper.getPixels(img);
-        helper.increase(binaryPixels);
+        int[][] increasePixels = helper.increase(binaryPixels);
+        int[][] erosionPixels = helper.erosion(binaryPixels);
     }
 }
