@@ -51,7 +51,61 @@ public class BitmapHelper {
         return img;
     }
 
-    public void increase(int[][] pixels){
+    public int[][] erosion(int[][] pixels){
+        int[][] resPixels = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
+
+        for (int i = 0; i < IMAGE_WIDTH; i++){
+            for (int j = 0; j < IMAGE_HEIGHT; j++){
+                if (!((i - 1 == -1) || (j - 1 == -1) || (i + 1 >= IMAGE_WIDTH) || (j + 1 >= IMAGE_HEIGHT))) {
+                    boolean isErosion = isErosionRegion(pixels, i, j);
+                    if (isErosion){
+                        boolean bCenterPixel = BooleanHelper.toBoolean(structureElement[1][1]);
+                        boolean bCurPixel = BooleanHelper.toBoolean(resPixels[i][j]);
+
+                        boolean resPixel = Boolean.logicalOr(bCenterPixel, bCurPixel);
+                        int centerPixel = BooleanHelper.toInt(resPixel);
+                        resPixels[i][j] = centerPixel;
+                    }
+                }
+            }
+        }
+
+        Logger.log("Erosion");
+        printPixels(resPixels);
+
+        return resPixels;
+    }
+
+    private boolean isErosionRegion(int[][] pixels, int i, int j){
+        int[][] curPixels = new int[3][3];
+        boolean isOk = true;
+
+        curPixels[0][0] = pixels[i - 1][j - 1];
+        curPixels[0][1] = pixels[i - 1][j];
+        curPixels[0][2] = pixels[i - 1][j + 1];
+
+        curPixels[1][0] = pixels[i][j - 1];
+        curPixels[1][1] = pixels[i][j];
+        curPixels[1][2] = pixels[i][j + 1];
+
+        curPixels[2][0] = pixels[i + 1][j - 1];
+        curPixels[2][1] = pixels[i + 1][j];
+        curPixels[2][2] = pixels[i + 1][j + 1];
+
+        for (int m = 0; m < 3; m++){
+            for (int n = 0; n < 3; n++){
+                if (curPixels[m][n] == structureElement[m][n] && isOk)
+                    isOk = true;
+                else
+                    isOk = false;
+            }
+
+        }
+
+        return isOk;
+    }
+
+    public int[][] increase(int[][] pixels){
         int[][] res = new int[IMAGE_WIDTH][IMAGE_HEIGHT];
         initOutherInnerMatrix();
 
@@ -93,7 +147,10 @@ public class BitmapHelper {
 
         }
 
+        Logger.log("Increase");
         printPixels(res);
+
+        return res;
     }
 
     private int[][] doIncrease(int[][] curPixels){
